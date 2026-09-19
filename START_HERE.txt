@@ -1,0 +1,40 @@
+PAGEWISE DELIVERY
+=================
+
+This folder contains the completed PageWise project source.
+
+LOCAL RUN:
+1. Start Ollama:
+   ollama serve
+2. Make sure Qwen3 4B exists:
+   ollama pull qwen3:4b
+3. Backend:
+   cd backend
+   python -m venv venv
+   venv\Scripts\activate
+   pip install -r requirements.txt
+   python app.py
+4. Frontend (new terminal):
+   cd frontend
+   npm install
+   npm run dev
+5. Open http://localhost:5173
+
+FEATURES INCLUDED:
+- Login/Register/Logout
+- PDF upload and extraction
+- AI Smart Notes
+- Edit/save notes
+- TXT/Markdown downloads
+- Ask PageWise
+- Quick Revision
+- Exam Mode
+- My Documents
+- My Notes
+- Progress
+- Responsive phone/tablet/laptop UI
+- SQLite persistence
+- Ollama/Qwen3 4B local AI
+
+LIVE LINK NOTE:
+A public live URL requires hosting the frontend and Flask backend. Because Qwen3 4B runs through Ollama, the AI backend needs a server/VPS capable of running Ollama, or the AI layer must later be switched to a hosted model. See DEPLOYMENT.md.
