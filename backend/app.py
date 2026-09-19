@@ -8,6 +8,9 @@ import os
 import re
 import secrets
 from functools import wraps
+from huggingface_hub import InferenceClient
+from dotenv import load_dotenv
+load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "pagewise.db")
@@ -99,22 +102,64 @@ def clean_ai_response(text):
 
 
 def ask_ollama(prompt, max_tokens=900, retries=2):
-    last_error = ""
+    hf_token = os.getenv("HF_TOKEN")
+
+    # Use Hugging Face when HF_TOKEN is configured
+    if hf_token:
+        try:
+            client = InferenceClient(
+                provider="auto",
+                api_key=hf_token
+            )
+
+            response = client.chat_completion(
+                model="Qwen/Qwen3-4B-Instruct-2507",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                max_tokens=max_tokens,
+                temperature=0.2,
+            )
+
+            text = response.choices[0].message.content or ""
+            text = clean_ai_response(text)
+
+            if text.strip():
+                return text
+
+        except Exception as e:
+            print("Hugging Face AI error:", e)
+
+    # Fallback to local Ollama
     for attempt in range(retries + 1):
         try:
             response = ollama.generate(
                 model=MODEL,
                 prompt=prompt,
-                options={"num_predict": max_tokens, "temperature": 0.2},
+                options={
+                    "num_predict": max_tokens,
+                    "temperature": 0.2,
+                },
             )
-            text = clean_ai_response(getattr(response, "response", "") or response.get("response", ""))
-            if text:
+
+            text = getattr(response, "response", "") or ""
+
+            if not text and isinstance(response, dict):
+                text = response.get("response", "")
+
+            text = clean_ai_response(text)
+
+            if text.strip():
                 return text
-            last_error = "Ollama returned an empty response."
-        except Exception as exc:
-            last_error = str(exc)
-            print(f"Ollama attempt {attempt + 1} failed: {exc}")
-    print("AI ERROR:", last_error)
+
+            print(f"WARNING: Ollama returned empty response (attempt {attempt + 1})")
+
+        except Exception as e:
+            print(f"Ollama error (attempt {attempt + 1}):", e)
+
     return ""
 
 
