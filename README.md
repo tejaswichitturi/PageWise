@@ -13,7 +13,6 @@ PageWise is a responsive AI study assistant that turns PDF study material into n
 - Exam Mode
 - Editable notes
 - Save notes to SQLite
-- TXT and Markdown downloads
 - Extracted-text download
 - User registration/login/logout
 - My Documents, My Notes and Progress
